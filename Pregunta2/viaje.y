@@ -7,7 +7,6 @@ extern int yylex();
 extern int yyparse();
 extern FILE *yyin;
 void yyerror(const char *s);
-int combustible = 0;
 %}
 
 %union {
@@ -15,46 +14,41 @@ int combustible = 0;
     char* str;
 }
 
-%token <str> GALAXIA NAVE VIAJAR AUTONOMO GUIADO COMBUSTIBLE
+%token <str> NAVE RUTA AUTONOMO GUIADO
 %token <numero> NUMERO
 %token <str> IDENTIFICADOR
-%token IGUAL PUNTOYCOMA
+%token IGUAL PUNTOYCOMA COMA
 
-%type <str> definicion_nave comando_viajar
+%type <str> definicion_nave definicion_ruta
 
 %%
 
 programa:
-    definiciones comandos
+    definiciones
 ;
 
 definiciones:
     definicion_nave
+    | definicion_ruta
+    | definiciones definicion_nave
+    | definiciones definicion_ruta
 ;
 
 definicion_nave:
-    NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO PUNTOYCOMA
+    NAVE IDENTIFICADOR COMA AUTONOMO PUNTOYCOMA
     {
-        printf("Definición de nave: %s con combustible %d\n", $2, $6);
-        combustible = $6;
+        printf("Definición de nave autónoma: %s\n", $2);
+    }
+    | NAVE IDENTIFICADOR COMA GUIADO PUNTOYCOMA
+    {
+        printf("Definición de nave guiada: %s\n", $2);
     }
 ;
 
-comandos:
-    comando_viajar
-    | comandos comando_viajar
-;
-
-comando_viajar:
-    VIAJAR AUTONOMO IGUAL NUMERO PUNTOYCOMA
+definicion_ruta:
+    RUTA IDENTIFICADOR COMA IDENTIFICADOR PUNTOYCOMA
     {
-        int distancia = $4;
-        if (combustible >= distancia) {
-            combustible -= distancia;
-            printf("La nave viajó %d unidades de distancia. Combustible restante: %d\n", distancia, combustible);
-        } else {
-            printf("Combustible insuficiente para el viaje.\n");
-        }
+        printf("Definición de ruta de %s a %s\n", $2, $4);
     }
 ;
 

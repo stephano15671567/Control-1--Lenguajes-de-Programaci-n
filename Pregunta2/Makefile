@@ -1,13 +1,7 @@
-all: viaje
-
-viaje: lex.yy.c y.tab.c
-	gcc -o viaje lex.yy.c y.tab.c -lfl
-
-lex.yy.c: viaje.l
-	flex viaje.l
-
-y.tab.c: viaje.y
+viaje: viaje.l viaje.y
 	bison -d viaje.y
+	flex viaje.l
+	gcc lex.yy.c viaje.tab.c -o viaje -lfl
 
 clean:
-	rm -f viaje lex.yy.c y.tab.c y.tab.h
+	rm -f lex.yy.c viaje.tab.c viaje.tab.h viaje

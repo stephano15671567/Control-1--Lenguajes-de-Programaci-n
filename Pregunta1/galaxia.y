@@ -18,7 +18,7 @@ void yyerror(const char *s);
 %token <numero> NUMERO
 %token <str> IDENTIFICADOR
 %token IGUAL PUNTOYCOMA COMA
-%token GALAXIA NAVE ARISTA REABASTECER VIAJAR AUTONOMO GUIADO COMBUSTIBLE PESO
+%token REABASTECER VIAJAR AUTONOMO GUIADO
 
 %type <str> definicion_galaxia definicion_nave definicion_arista
 

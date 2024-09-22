@@ -1,13 +1,7 @@
-all: galaxia
-
-galaxia: lex.yy.c y.tab.c
-	gcc -o galaxia lex.yy.c y.tab.c -lfl
-
-lex.yy.c: galaxia.l
-	flex galaxia.l
-
-y.tab.c: galaxia.y
+galaxia: galaxia.l galaxia.y
 	bison -d galaxia.y
+	flex galaxia.l
+	gcc lex.yy.c galaxia.tab.c -o galaxia -lfl
 
 clean:
-	rm -f galaxia lex.yy.c y.tab.c y.tab.h
+	rm -f lex.yy.c galaxia.tab.c galaxia.tab.h galaxia
