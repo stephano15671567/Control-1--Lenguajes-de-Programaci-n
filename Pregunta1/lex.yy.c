@@ -365,14 +365,14 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[78] =
     {   0,
-        0,    0,   19,   17,   15,   16,   16,   13,   11,   12,
-       14,   10,   10,   10,   10,   10,   10,   10,   10,   15,
+        0,    0,   19,   17,   15,   16,   16,   14,   11,   13,
+       12,   10,   10,   10,   10,   10,   10,   10,   10,   15,
        11,   10,   10,   10,   10,   10,   10,   10,   10,   10,
        10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
-       10,   10,   10,   10,   10,    6,    9,   10,   10,   10,
-       10,   10,   10,   10,   10,   10,    7,   10,   10,   10,
-        4,   10,    2,   10,   10,    5,   10,    3,   10,   10,
-       10,   10,   10,   10,    8,    1,    0
+       10,   10,   10,   10,   10,    3,    5,   10,   10,   10,
+       10,   10,   10,   10,   10,   10,    2,   10,   10,   10,
+        9,   10,    7,   10,   10,    1,   10,    8,   10,   10,
+       10,   10,   10,   10,    4,    6,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -492,8 +492,7 @@ char *yytext;
 #include <stdio.h>
 #include <stdlib.h>
 #line 494 "lex.yy.c"
-/* Definir las expresiones regulares */
-#line 496 "lex.yy.c"
+#line 495 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -710,10 +709,10 @@ YY_DECL
 		}
 
 	{
-#line 19 "galaxia.l"
+#line 14 "galaxia.l"
 
 
-#line 716 "lex.yy.c"
+#line 715 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -772,96 +771,96 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 21 "galaxia.l"
-{ return REABASTECER; }
+#line 16 "galaxia.l"
+return GALAXIA;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 22 "galaxia.l"
-{ return VIAJAR; }
+#line 17 "galaxia.l"
+return ARISTA;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 23 "galaxia.l"
-{ return AUTONOMO; }
+#line 18 "galaxia.l"
+return NAVE;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 24 "galaxia.l"
-{ return GUIADO; }
+#line 19 "galaxia.l"
+return COMBUSTIBLE;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 25 "galaxia.l"
-{ return GALAXIA; }
+#line 20 "galaxia.l"
+return PESO;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 26 "galaxia.l"
-{ return NAVE; }
+#line 21 "galaxia.l"
+return REABASTECER;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 27 "galaxia.l"
-{ return ARISTA; }
+#line 22 "galaxia.l"
+return VIAJAR;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 28 "galaxia.l"
-{ return COMBUSTIBLE; }
+#line 23 "galaxia.l"
+return AUTONOMO;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 29 "galaxia.l"
-{ return PESO; }
+#line 24 "galaxia.l"
+return GUIADO;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 31 "galaxia.l"
+#line 25 "galaxia.l"
 { yylval.str = strdup(yytext); return IDENTIFICADOR; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 32 "galaxia.l"
+#line 26 "galaxia.l"
 { yylval.numero = atoi(yytext); return NUMERO; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 34 "galaxia.l"
-{ return PUNTOYCOMA; }
+#line 27 "galaxia.l"
+return IGUAL;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 35 "galaxia.l"
-{ return COMA; }
+#line 28 "galaxia.l"
+return PUNTOYCOMA;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 36 "galaxia.l"
-{ return IGUAL; }
+#line 29 "galaxia.l"
+return COMA;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 38 "galaxia.l"
+#line 30 "galaxia.l"
 {/* Ignorar espacios en blanco */}
 	YY_BREAK
 case 16:
 /* rule 16 can match eol */
 YY_RULE_SETUP
-#line 39 "galaxia.l"
+#line 31 "galaxia.l"
 {/* Ignorar saltos de línea */}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 41 "galaxia.l"
-{ printf("Caracter no reconocido: %s\n", yytext); }
+#line 32 "galaxia.l"
+{ printf("Caracter no reconocido: %s\n", yytext); return yytext[0]; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 43 "galaxia.l"
+#line 34 "galaxia.l"
 ECHO;
 	YY_BREAK
-#line 864 "lex.yy.c"
+#line 863 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1866,6 +1865,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 43 "galaxia.l"
+#line 34 "galaxia.l"
 
 

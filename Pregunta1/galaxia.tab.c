@@ -78,7 +78,10 @@ extern int yyparse();
 extern FILE *yyin;
 void yyerror(const char *s);
 
-#line 82 "galaxia.tab.c"
+int combustible = 0; // Combustible de la nave
+char* ubicacion_nave = NULL; // Ubicación actual de la nave
+
+#line 85 "galaxia.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -128,7 +131,8 @@ enum yysymbol_kind_t
   YYSYMBOL_definiciones = 19,              /* definiciones  */
   YYSYMBOL_definicion_galaxia = 20,        /* definicion_galaxia  */
   YYSYMBOL_definicion_nave = 21,           /* definicion_nave  */
-  YYSYMBOL_definicion_arista = 22          /* definicion_arista  */
+  YYSYMBOL_definicion_arista = 22,         /* definicion_arista  */
+  YYSYMBOL_ubicacion = 23                  /* ubicacion  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -456,16 +460,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  12
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   23
+#define YYLAST   28
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  17
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  6
+#define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  11
+#define YYNRULES  12
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  29
+#define YYNSTATES  34
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   271
@@ -516,8 +520,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    28,    28,    32,    33,    34,    35,    36,    37,    41,
-      48,    55
+       0,    31,    31,    35,    36,    37,    38,    39,    40,    44,
+      51,    60,    67
 };
 #endif
 
@@ -537,7 +541,7 @@ static const char *const yytname[] =
   "ARISTA", "COMBUSTIBLE", "PESO", "NUMERO", "IDENTIFICADOR", "IGUAL",
   "PUNTOYCOMA", "COMA", "REABASTECER", "VIAJAR", "AUTONOMO", "GUIADO",
   "$accept", "programa", "definiciones", "definicion_galaxia",
-  "definicion_nave", "definicion_arista", YY_NULLPTR
+  "definicion_nave", "definicion_arista", "ubicacion", YY_NULLPTR
 };
 
 static const char *
@@ -563,7 +567,8 @@ static const yytype_int8 yypact[] =
 {
       -3,    -6,    -5,    -4,     6,    -3,    -7,    -7,    -7,    -2,
       -1,     0,    -7,    -7,    -7,    -7,    -7,     1,     4,     5,
-       7,     2,     9,     3,     8,    -7,    11,    10,    -7
+       7,     2,     9,     8,    11,    10,    14,    -7,    12,     3,
+      13,    -7,    16,    -7
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -573,19 +578,20 @@ static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,     2,     3,     4,     5,     0,
        0,     0,     1,     6,     7,     8,     9,     0,     0,     0,
-       0,     0,     0,     0,     0,    10,     0,     0,    11
+       0,     0,     0,     0,     0,     0,     0,    12,     0,     0,
+       0,    11,     0,    10
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -7,    -7,    -7,    15,    17,    18
+      -7,    -7,    -7,    18,    20,    23,    -7
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     4,     5,     6,     7,     8
+       0,     4,     5,     6,     7,     8,    28
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -594,15 +600,15 @@ static const yytype_int8 yydefgoto[] =
 static const yytype_int8 yytable[] =
 {
        1,     2,     3,     9,    10,    11,    12,    19,     0,    16,
-      23,    17,    18,    20,    25,    21,    24,    22,    26,    27,
-      13,    28,    14,    15
+      23,    17,    18,    20,    31,    21,    24,    22,     0,    27,
+      25,    26,    29,    13,    30,    14,    32,    33,    15
 };
 
 static const yytype_int8 yycheck[] =
 {
        3,     4,     5,     9,     9,     9,     0,     6,    -1,    11,
-       8,    12,    12,     9,    11,    10,     7,    10,    10,     8,
-       5,    11,     5,     5
+       8,    12,    12,     9,    11,    10,     7,    10,    -1,     9,
+      12,    10,     8,     5,    12,     5,    13,    11,     5
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -611,21 +617,22 @@ static const yytype_int8 yystos[] =
 {
        0,     3,     4,     5,    18,    19,    20,    21,    22,     9,
        9,     9,     0,    20,    21,    22,    11,    12,    12,     6,
-       9,    10,    10,     8,     7,    11,    10,     8,    11
+       9,    10,    10,     8,     7,    12,    10,     9,    23,     8,
+      12,    11,    13,    11
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    17,    18,    19,    19,    19,    19,    19,    19,    20,
-      21,    22
+      21,    22,    23
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     1,     1,     1,     2,     2,     2,     3,
-       7,     9
+      11,     9,     1
 };
 
 
@@ -1089,31 +1096,41 @@ yyreduce:
   switch (yyn)
     {
   case 9: /* definicion_galaxia: GALAXIA IDENTIFICADOR PUNTOYCOMA  */
-#line 42 "galaxia.y"
+#line 45 "galaxia.y"
     {
         printf("Definición de galaxia: %s\n", (yyvsp[-1].str));
     }
-#line 1097 "galaxia.tab.c"
+#line 1104 "galaxia.tab.c"
     break;
 
-  case 10: /* definicion_nave: NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO PUNTOYCOMA  */
-#line 49 "galaxia.y"
+  case 10: /* definicion_nave: NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO COMA ubicacion COMA REABASTECER PUNTOYCOMA  */
+#line 52 "galaxia.y"
     {
-        printf("Definición de nave: %s con combustible %d\n", (yyvsp[-5].str), (yyvsp[-1].numero));
+        combustible = (yyvsp[-5].numero);
+        ubicacion_nave = strdup((yyvsp[-3].str));
+        printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n", (yyvsp[-9].str), combustible, ubicacion_nave);
     }
-#line 1105 "galaxia.tab.c"
+#line 1114 "galaxia.tab.c"
     break;
 
   case 11: /* definicion_arista: ARISTA IDENTIFICADOR COMA IDENTIFICADOR IGUAL PESO IGUAL NUMERO PUNTOYCOMA  */
-#line 56 "galaxia.y"
+#line 61 "galaxia.y"
     {
         printf("Definición de arista entre %s y %s con peso %d\n", (yyvsp[-7].str), (yyvsp[-5].str), (yyvsp[-1].numero));
     }
-#line 1113 "galaxia.tab.c"
+#line 1122 "galaxia.tab.c"
+    break;
+
+  case 12: /* ubicacion: IDENTIFICADOR  */
+#line 68 "galaxia.y"
+    {
+        (yyval.str) = (yyvsp[0].str);
+    }
+#line 1130 "galaxia.tab.c"
     break;
 
 
-#line 1117 "galaxia.tab.c"
+#line 1134 "galaxia.tab.c"
 
       default: break;
     }
@@ -1306,7 +1323,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 61 "galaxia.y"
+#line 73 "galaxia.y"
 
 
 void yyerror(const char *s) {

@@ -7,6 +7,9 @@ extern int yylex();
 extern int yyparse();
 extern FILE *yyin;
 void yyerror(const char *s);
+
+int combustible = 0; // Combustible de la nave
+char* ubicacion_nave = NULL; // Ubicación actual de la nave
 %}
 
 %union {
@@ -20,7 +23,7 @@ void yyerror(const char *s);
 %token IGUAL PUNTOYCOMA COMA
 %token REABASTECER VIAJAR AUTONOMO GUIADO
 
-%type <str> definicion_galaxia definicion_nave definicion_arista
+%type <str> definicion_galaxia definicion_nave definicion_arista ubicacion
 
 %%
 
@@ -45,9 +48,11 @@ definicion_galaxia:
 ;
 
 definicion_nave:
-    NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO PUNTOYCOMA
+    NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO COMA ubicacion COMA REABASTECER PUNTOYCOMA
     {
-        printf("Definición de nave: %s con combustible %d\n", $2, $6);
+        combustible = $6;
+        ubicacion_nave = strdup($8);
+        printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n", $2, combustible, ubicacion_nave);
     }
 ;
 
@@ -55,6 +60,13 @@ definicion_arista:
     ARISTA IDENTIFICADOR COMA IDENTIFICADOR IGUAL PESO IGUAL NUMERO PUNTOYCOMA
     {
         printf("Definición de arista entre %s y %s con peso %d\n", $2, $4, $8);
+    }
+;
+
+ubicacion:
+    IDENTIFICADOR
+    {
+        $$ = $1;
     }
 ;
 

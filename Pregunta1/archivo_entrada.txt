@@ -30,3 +30,5 @@ arista C, B = peso = 21;
 arista C, E = peso = 12;
 arista C, Centro = peso = 25;
 arista B, Centro = peso = 23;
+
+nave Enterprise, combustible = 1000, B, reabastecer;
