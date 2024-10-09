@@ -72,6 +72,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "galaxia.tab.h"
 
 extern int yylex();
 extern int yyparse();
@@ -81,7 +82,185 @@ void yyerror(const char *s);
 int combustible = 0; // Combustible de la nave
 char* ubicacion_nave = NULL; // Ubicación actual de la nave
 
-#line 85 "galaxia.tab.c"
+// Definición de las estructuras de datos para el grafo
+typedef struct Arista {
+    char* destino;
+    int peso;
+    struct Arista* siguiente;
+} Arista;
+
+typedef struct Galaxia {
+    char* nombre;
+    Arista* adyacencias;
+    struct Galaxia* siguiente;
+} Galaxia;
+
+Galaxia* galaxias = NULL;
+
+Galaxia* buscarGalaxia(Galaxia* lista, char* nombre);
+Galaxia* agregarGalaxia(Galaxia* lista, char* nombre);
+void agregarArista(Galaxia* galaxia, char* destino, int peso);
+
+// Implementación de las funciones del grafo
+Galaxia* buscarGalaxia(Galaxia* lista, char* nombre){
+    Galaxia* actual = lista;
+    while (actual != NULL){
+        if (strcmp(actual->nombre, nombre) == 0) {
+            return actual;
+        }
+        actual = actual->siguiente;
+    }
+    return NULL;
+}
+
+Galaxia* agregarGalaxia(Galaxia* lista, char* nombre){
+    Galaxia* nueva = (Galaxia*)malloc(sizeof(Galaxia));
+    nueva->nombre = strdup(nombre);
+    nueva->adyacencias = NULL;
+    nueva->siguiente = lista;
+    return nueva;
+}
+
+void agregarArista(Galaxia* galaxia, char* destino, int peso){
+    Arista* nueva = (Arista*)malloc(sizeof(Arista));
+    nueva->destino = strdup(destino);
+    nueva->peso = peso;
+    nueva->siguiente = galaxia->adyacencias;
+    galaxia->adyacencias = nueva;
+}
+
+// Definición del algoritmo de Dijkstra
+#define INFINITO 999999
+
+Galaxia* encontrarMenorDistancia(Galaxia* lista, int* distancias, int* visitados);
+void dijkstra(Galaxia* lista, char* inicio, char* destino);
+
+// Implementación del algoritmo de Dijkstra
+Galaxia* encontrarMenorDistancia(Galaxia* lista, int* distancias, int* visitados) {
+    Galaxia* menorNodo = NULL;
+    int menorDistancia = INFINITO;
+    Galaxia* actual = lista;
+    int index = 0;
+    while (actual != NULL) {
+        if (!visitados[index] && distancias[index] < menorDistancia) {
+            menorDistancia = distancias[index];
+            menorNodo = actual;
+        }
+        actual = actual->siguiente;
+        index++;
+    }
+    return menorNodo;
+}
+
+void dijkstra(Galaxia* lista, char* inicio, char* destino) {
+    int distancias[100];          // Para almacenar la distancia más corta a cada galaxia
+    int visitados[100] = {0};     // Marcar galaxias ya visitadas
+    Galaxia* predecesores[100] = {NULL}; // Para almacenar el predecesor de cada galaxia
+    Galaxia* nodos[100];          // Lista de galaxias por índice para facilitar el acceso
+    int index = 0;
+
+    // Inicializar distancias a infinito y predecesores a NULL
+    Galaxia* actual = lista;
+    while (actual != NULL) {
+        distancias[index] = INFINITO;
+        nodos[index] = actual;
+        actual = actual->siguiente;
+        index++;
+    }
+
+    int num_nodos = index; // Número total de galaxias
+
+    // La distancia al nodo de inicio es 0
+    int idxInicio = -1;
+    for (int i = 0; i < num_nodos; i++) {
+        if (strcmp(nodos[i]->nombre, inicio) == 0) {
+            idxInicio = i;
+            break;
+        }
+    }
+    if (idxInicio == -1) {
+        printf("Error: La galaxia de inicio no existe\n");
+        return;
+    }
+
+    int idxDestino = -1;
+    for (int i = 0; i < num_nodos; i++) {
+        if (strcmp(nodos[i]->nombre, destino) == 0) {
+            idxDestino = i;
+            break;
+        }
+    }
+    if (idxDestino == -1) {
+        printf("Error: La galaxia de destino no existe\n");
+        return;
+    }
+
+    distancias[idxInicio] = 0;
+
+    // Mientras haya nodos no visitados con distancia finita
+    while ((actual = encontrarMenorDistancia(lista, distancias, visitados)) != NULL) {
+        // Obtener el índice del nodo actual
+        int idxActual = -1;
+        for (int i = 0; i < num_nodos; i++) {
+            if (nodos[i] == actual) {
+                idxActual = i;
+                break;
+            }
+        }
+
+        // Marcar el nodo como visitado
+        visitados[idxActual] = 1;
+
+        // Recorrer las aristas del nodo actual (sus vecinos)
+        Arista* arista = actual->adyacencias;
+        while (arista != NULL) {
+            // Encontrar el índice del nodo destino de esta arista
+            int idxDestinoArista = -1;
+            for (int i = 0; i < num_nodos; i++) {
+                if (strcmp(nodos[i]->nombre, arista->destino) == 0) {
+                    idxDestinoArista = i;
+                    break;
+                }
+            }
+
+            // Si encontramos una ruta más corta, actualizamos la distancia
+            if (idxDestinoArista != -1 && !visitados[idxDestinoArista] && distancias[idxActual] + arista->peso < distancias[idxDestinoArista]) {
+                distancias[idxDestinoArista] = distancias[idxActual] + arista->peso;
+                predecesores[idxDestinoArista] = actual;
+            }
+
+            arista = arista->siguiente;
+        }
+    }
+
+    // Mostrar el camino más corto si existe
+    if (distancias[idxDestino] == INFINITO) {
+        printf("No existe un camino de %s a %s.\n", inicio, destino);
+    } else {
+        printf("La distancia más corta de %s a %s es: %d\n", inicio, destino, distancias[idxDestino]);
+
+        // Reconstruir el camino más corto
+        Galaxia* camino = nodos[idxDestino];
+        printf("El camino más corto es: %s", destino);
+        while (camino != nodos[idxInicio]) {
+            for (int i = 0; i < num_nodos; i++) {
+                if (nodos[i] == camino) {
+                    camino = predecesores[i];
+                    if (camino == NULL) {
+                        printf(" <- (Camino no válido)\n");
+                        return;
+                    }
+                    printf(" <- %s", camino->nombre);
+                    break;
+                }
+            }
+        }
+        printf("\n");
+    }
+}
+
+
+#line 264 "galaxia.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -117,22 +296,23 @@ enum yysymbol_kind_t
   YYSYMBOL_ARISTA = 5,                     /* ARISTA  */
   YYSYMBOL_COMBUSTIBLE = 6,                /* COMBUSTIBLE  */
   YYSYMBOL_PESO = 7,                       /* PESO  */
-  YYSYMBOL_NUMERO = 8,                     /* NUMERO  */
-  YYSYMBOL_IDENTIFICADOR = 9,              /* IDENTIFICADOR  */
-  YYSYMBOL_IGUAL = 10,                     /* IGUAL  */
+  YYSYMBOL_SUBGALAXIA = 8,                 /* SUBGALAXIA  */
+  YYSYMBOL_NUMERO = 9,                     /* NUMERO  */
+  YYSYMBOL_IDENTIFICADOR = 10,             /* IDENTIFICADOR  */
   YYSYMBOL_PUNTOYCOMA = 11,                /* PUNTOYCOMA  */
   YYSYMBOL_COMA = 12,                      /* COMA  */
-  YYSYMBOL_REABASTECER = 13,               /* REABASTECER  */
-  YYSYMBOL_VIAJAR = 14,                    /* VIAJAR  */
-  YYSYMBOL_AUTONOMO = 15,                  /* AUTONOMO  */
-  YYSYMBOL_GUIADO = 16,                    /* GUIADO  */
-  YYSYMBOL_YYACCEPT = 17,                  /* $accept  */
-  YYSYMBOL_programa = 18,                  /* programa  */
-  YYSYMBOL_definiciones = 19,              /* definiciones  */
-  YYSYMBOL_definicion_galaxia = 20,        /* definicion_galaxia  */
-  YYSYMBOL_definicion_nave = 21,           /* definicion_nave  */
-  YYSYMBOL_definicion_arista = 22,         /* definicion_arista  */
-  YYSYMBOL_ubicacion = 23                  /* ubicacion  */
+  YYSYMBOL_IGUAL = 13,                     /* IGUAL  */
+  YYSYMBOL_REABASTECER = 14,               /* REABASTECER  */
+  YYSYMBOL_VIAJAR = 15,                    /* VIAJAR  */
+  YYSYMBOL_AUTONOMO = 16,                  /* AUTONOMO  */
+  YYSYMBOL_GUIADO = 17,                    /* GUIADO  */
+  YYSYMBOL_YYACCEPT = 18,                  /* $accept  */
+  YYSYMBOL_programa = 19,                  /* programa  */
+  YYSYMBOL_definiciones = 20,              /* definiciones  */
+  YYSYMBOL_definicion_galaxia = 21,        /* definicion_galaxia  */
+  YYSYMBOL_definicion_nave = 22,           /* definicion_nave  */
+  YYSYMBOL_definicion_arista = 23,         /* definicion_arista  */
+  YYSYMBOL_ubicacion = 24                  /* ubicacion  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -463,7 +643,7 @@ union yyalloc
 #define YYLAST   28
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  17
+#define YYNTOKENS  18
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
@@ -472,7 +652,7 @@ union yyalloc
 #define YYNSTATES  34
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   271
+#define YYMAXUTOK   272
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -513,15 +693,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16
+      15,    16,    17
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int8 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,    31,    31,    35,    36,    37,    38,    39,    40,    44,
-      51,    60,    67
+       0,   209,   209,   213,   214,   215,   216,   217,   218,   222,
+     231,   240,   253
 };
 #endif
 
@@ -538,9 +718,9 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "GALAXIA", "NAVE",
-  "ARISTA", "COMBUSTIBLE", "PESO", "NUMERO", "IDENTIFICADOR", "IGUAL",
-  "PUNTOYCOMA", "COMA", "REABASTECER", "VIAJAR", "AUTONOMO", "GUIADO",
-  "$accept", "programa", "definiciones", "definicion_galaxia",
+  "ARISTA", "COMBUSTIBLE", "PESO", "SUBGALAXIA", "NUMERO", "IDENTIFICADOR",
+  "PUNTOYCOMA", "COMA", "IGUAL", "REABASTECER", "VIAJAR", "AUTONOMO",
+  "GUIADO", "$accept", "programa", "definiciones", "definicion_galaxia",
   "definicion_nave", "definicion_arista", "ubicacion", YY_NULLPTR
 };
 
@@ -551,7 +731,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-7)
+#define YYPACT_NINF (-8)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -565,10 +745,10 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,    -6,    -5,    -4,     6,    -3,    -7,    -7,    -7,    -2,
-      -1,     0,    -7,    -7,    -7,    -7,    -7,     1,     4,     5,
-       7,     2,     9,     8,    11,    10,    14,    -7,    12,     3,
-      13,    -7,    16,    -7
+      -3,    -7,    -6,    -5,     6,    -3,    -8,    -8,    -8,    -4,
+      -2,    -1,    -8,    -8,    -8,    -8,    -8,     2,     3,     1,
+       4,     0,     5,     7,     8,    10,     9,    -8,    11,    13,
+      12,    -8,    14,    -8
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -585,7 +765,7 @@ static const yytype_int8 yydefact[] =
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -7,    -7,    -7,    18,    20,    23,    -7
+      -8,    -8,    -8,    17,    22,    23,    -8
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -599,33 +779,33 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       1,     2,     3,     9,    10,    11,    12,    19,     0,    16,
-      23,    17,    18,    20,    31,    21,    24,    22,     0,    27,
-      25,    26,    29,    13,    30,    14,    32,    33,    15
+       1,     2,     3,     9,    10,    11,    12,    16,    19,    23,
+      17,    18,    24,    20,    21,     0,     0,    22,    29,    25,
+      27,    26,    13,    30,    31,    33,    32,    14,    15
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,     4,     5,     9,     9,     9,     0,     6,    -1,    11,
-       8,    12,    12,     9,    11,    10,     7,    10,    -1,     9,
-      12,    10,     8,     5,    12,     5,    13,    11,     5
+       3,     4,     5,    10,    10,    10,     0,    11,     6,     9,
+      12,    12,     7,    10,    13,    -1,    -1,    13,     9,    12,
+      10,    13,     5,    12,    11,    11,    14,     5,     5
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,     4,     5,    18,    19,    20,    21,    22,     9,
-       9,     9,     0,    20,    21,    22,    11,    12,    12,     6,
-       9,    10,    10,     8,     7,    12,    10,     9,    23,     8,
-      12,    11,    13,    11
+       0,     3,     4,     5,    19,    20,    21,    22,    23,    10,
+      10,    10,     0,    21,    22,    23,    11,    12,    12,     6,
+      10,    13,    13,     9,     7,    12,    13,    10,    24,     9,
+      12,    11,    14,    11
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    17,    18,    19,    19,    19,    19,    19,    19,    20,
-      21,    22,    23
+       0,    18,    19,    20,    20,    20,    20,    20,    20,    21,
+      22,    23,    24
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -1096,41 +1276,49 @@ yyreduce:
   switch (yyn)
     {
   case 9: /* definicion_galaxia: GALAXIA IDENTIFICADOR PUNTOYCOMA  */
-#line 45 "galaxia.y"
+#line 223 "galaxia.y"
     {
-        printf("Definición de galaxia: %s\n", (yyvsp[-1].str));
+        if(buscarGalaxia(galaxias,(yyvsp[-1].str)) == NULL){
+            galaxias = agregarGalaxia(galaxias,(yyvsp[-1].str));
+        }
     }
-#line 1104 "galaxia.tab.c"
+#line 1286 "galaxia.tab.c"
     break;
 
   case 10: /* definicion_nave: NAVE IDENTIFICADOR COMA COMBUSTIBLE IGUAL NUMERO COMA ubicacion COMA REABASTECER PUNTOYCOMA  */
-#line 52 "galaxia.y"
+#line 232 "galaxia.y"
     {
         combustible = (yyvsp[-5].numero);
         ubicacion_nave = strdup((yyvsp[-3].str));
         printf("Nave '%s' creada con %d unidades de combustible en la galaxia '%s'\n", (yyvsp[-9].str), combustible, ubicacion_nave);
     }
-#line 1114 "galaxia.tab.c"
+#line 1296 "galaxia.tab.c"
     break;
 
   case 11: /* definicion_arista: ARISTA IDENTIFICADOR COMA IDENTIFICADOR IGUAL PESO IGUAL NUMERO PUNTOYCOMA  */
-#line 61 "galaxia.y"
+#line 241 "galaxia.y"
     {
-        printf("Definición de arista entre %s y %s con peso %d\n", (yyvsp[-7].str), (yyvsp[-5].str), (yyvsp[-1].numero));
+        Galaxia* origen = buscarGalaxia(galaxias,(yyvsp[-7].str));
+        Galaxia* destino = buscarGalaxia(galaxias, (yyvsp[-5].str));
+        if(origen && destino){
+            agregarArista(origen, (yyvsp[-5].str), (yyvsp[-1].numero));
+        }else{
+            printf("Error: Las galaxias %s o %s no existen.\n", (yyvsp[-7].str), (yyvsp[-5].str));
+        }
     }
-#line 1122 "galaxia.tab.c"
+#line 1310 "galaxia.tab.c"
     break;
 
   case 12: /* ubicacion: IDENTIFICADOR  */
-#line 68 "galaxia.y"
+#line 254 "galaxia.y"
     {
         (yyval.str) = (yyvsp[0].str);
     }
-#line 1130 "galaxia.tab.c"
+#line 1318 "galaxia.tab.c"
     break;
 
 
-#line 1134 "galaxia.tab.c"
+#line 1322 "galaxia.tab.c"
 
       default: break;
     }
@@ -1323,7 +1511,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 73 "galaxia.y"
+#line 259 "galaxia.y"
 
 
 void yyerror(const char *s) {
@@ -1340,5 +1528,6 @@ int main(int argc, char **argv) {
         yyin = archivo;
     }
     yyparse();
+    dijkstra(galaxias, "D", "E");
     return 0;
-}
+ }

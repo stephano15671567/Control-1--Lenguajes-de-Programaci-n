@@ -1,5 +1,5 @@
 %{
-#include "galaxia.tab.h"
+#include "galaxia.tab.h"  // Asegúrate de que el archivo generado por Bison está siendo incluido correctamente.
 #include <stdio.h>
 #include <stdlib.h>
 %}
@@ -13,6 +13,7 @@ ESPACIO  [ \t]
 
 %%
 
+"subgalaxia"      return SUBGALAXIA;
 "galaxia"         return GALAXIA;
 "arista"          return ARISTA;
 "nave"            return NAVE;
@@ -27,7 +28,7 @@ ESPACIO  [ \t]
 "="               return IGUAL;
 ";"               return PUNTOYCOMA;
 ","               return COMA;
-{ESPACIO}+        {/* Ignorar espacios en blanco */}
+{ESPACIO}+        {/* Ignorar espacios en blanco */ }
 [\n\r]            {/* Ignorar saltos de línea */}
 .                 { printf("Caracter no reconocido: %s\n", yytext); return yytext[0]; }
 

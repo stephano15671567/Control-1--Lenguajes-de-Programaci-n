@@ -59,15 +59,16 @@ extern int yydebug;
     ARISTA = 260,                  /* ARISTA  */
     COMBUSTIBLE = 261,             /* COMBUSTIBLE  */
     PESO = 262,                    /* PESO  */
-    NUMERO = 263,                  /* NUMERO  */
-    IDENTIFICADOR = 264,           /* IDENTIFICADOR  */
-    IGUAL = 265,                   /* IGUAL  */
+    SUBGALAXIA = 263,              /* SUBGALAXIA  */
+    NUMERO = 264,                  /* NUMERO  */
+    IDENTIFICADOR = 265,           /* IDENTIFICADOR  */
     PUNTOYCOMA = 266,              /* PUNTOYCOMA  */
     COMA = 267,                    /* COMA  */
-    REABASTECER = 268,             /* REABASTECER  */
-    VIAJAR = 269,                  /* VIAJAR  */
-    AUTONOMO = 270,                /* AUTONOMO  */
-    GUIADO = 271                   /* GUIADO  */
+    IGUAL = 268,                   /* IGUAL  */
+    REABASTECER = 269,             /* REABASTECER  */
+    VIAJAR = 270,                  /* VIAJAR  */
+    AUTONOMO = 271,                /* AUTONOMO  */
+    GUIADO = 272                   /* GUIADO  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -76,12 +77,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 15 "galaxia.y"
+#line 194 "galaxia.y"
 
     int numero;
     char* str;
 
-#line 85 "galaxia.tab.h"
+#line 86 "galaxia.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
