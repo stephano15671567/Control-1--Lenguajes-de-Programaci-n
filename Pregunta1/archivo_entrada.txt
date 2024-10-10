@@ -27,6 +27,9 @@ arista B, C = peso = 21;
 
 arista C, F = peso = 13;
 
+arista D, H = peso = 12;
+arista D, G = peso = 11;
+
 arista E, E1 = peso = 8;
 arista E, G = peso = 12;
 
