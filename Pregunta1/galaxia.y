@@ -51,13 +51,30 @@ Galaxia* agregarGalaxia(Galaxia* lista, char* nombre){
     return nueva;
 }
 
-void agregarArista(Galaxia* galaxia, char* destino, int peso){
+void agregarArista(Galaxia* galaxia, char* destino, int peso) {
+    // Agregar arista de galaxia -> destino
     Arista* nueva = (Arista*)malloc(sizeof(Arista));
     nueva->destino = strdup(destino);
     nueva->peso = peso;
     nueva->siguiente = galaxia->adyacencias;
     galaxia->adyacencias = nueva;
+
+    // Buscar la galaxia destino para agregar la arista destino -> galaxia
+    Galaxia* destinoGalaxia = buscarGalaxia(galaxias, destino);
+    if (destinoGalaxia != NULL) {
+        Arista* aristaInversa = (Arista*)malloc(sizeof(Arista));
+        aristaInversa->destino = strdup(galaxia->nombre);
+        aristaInversa->peso = peso;
+        aristaInversa->siguiente = destinoGalaxia->adyacencias;
+        destinoGalaxia->adyacencias = aristaInversa;
+    } else {
+        printf("Error: La galaxia destino %s no existe.\n", destino);
+    }
+
+    printf("Arista agregada de %s a %s con peso %d\n", galaxia->nombre, destino, peso);
+    printf("Arista agregada de %s a %s con peso %d\n", destino, galaxia->nombre, peso);
 }
+
 
 // Definición del algoritmo de Dijkstra
 #define INFINITO 999999
@@ -129,7 +146,6 @@ void dijkstra(Galaxia* lista, char* inicio, char* destino) {
 
     // Mientras haya nodos no visitados con distancia finita
     while ((actual = encontrarMenorDistancia(lista, distancias, visitados)) != NULL) {
-        // Obtener el índice del nodo actual
         int idxActual = -1;
         for (int i = 0; i < num_nodos; i++) {
             if (nodos[i] == actual) {
@@ -138,13 +154,10 @@ void dijkstra(Galaxia* lista, char* inicio, char* destino) {
             }
         }
 
-        // Marcar el nodo como visitado
         visitados[idxActual] = 1;
 
-        // Recorrer las aristas del nodo actual (sus vecinos)
         Arista* arista = actual->adyacencias;
         while (arista != NULL) {
-            // Encontrar el índice del nodo destino de esta arista
             int idxDestinoArista = -1;
             for (int i = 0; i < num_nodos; i++) {
                 if (strcmp(nodos[i]->nombre, arista->destino) == 0) {
@@ -153,7 +166,6 @@ void dijkstra(Galaxia* lista, char* inicio, char* destino) {
                 }
             }
 
-            // Si encontramos una ruta más corta, actualizamos la distancia
             if (idxDestinoArista != -1 && !visitados[idxDestinoArista] && distancias[idxActual] + arista->peso < distancias[idxDestinoArista]) {
                 distancias[idxDestinoArista] = distancias[idxActual] + arista->peso;
                 predecesores[idxDestinoArista] = actual;
@@ -163,24 +175,44 @@ void dijkstra(Galaxia* lista, char* inicio, char* destino) {
         }
     }
 
-    // Mostrar el camino más corto si existe
     if (distancias[idxDestino] == INFINITO) {
         printf("No existe un camino de %s a %s.\n", inicio, destino);
     } else {
-        printf("La distancia más corta de %s a %s es: %d\n", inicio, destino, distancias[idxDestino]);
+        printf("La distancia mas corta de %s a %s es: %d\n", inicio, destino, distancias[idxDestino]);
 
-        // Reconstruir el camino más corto
         Galaxia* camino = nodos[idxDestino];
-        printf("El camino más corto es: %s", destino);
+        printf("El camino mas corto es: %s", destino);
+        
         while (camino != nodos[idxInicio]) {
             for (int i = 0; i < num_nodos; i++) {
                 if (nodos[i] == camino) {
-                    camino = predecesores[i];
-                    if (camino == NULL) {
+                    Galaxia* predecesor = predecesores[i];
+                    if (predecesor == NULL) {
                         printf(" <- (Camino no válido)\n");
                         return;
                     }
-                    printf(" <- %s", camino->nombre);
+
+                    // Encontrar la arista entre el predecesor y el nodo actual (camino)
+                    Arista* arista = predecesor->adyacencias;
+                    while (arista != NULL) {
+                        if (strcmp(arista->destino, camino->nombre) == 0) {
+                            printf(" <- %s", predecesor->nombre);
+                            // Restar el peso al combustible de la nave
+                            combustible -= arista->peso;
+                            printf(" (combustible restante: %d)", combustible);
+
+                            // Si el combustible llega a cero o menos, la nave no puede continuar
+                            if (combustible <= 0) {
+                                printf("\nLa nave se ha quedado sin combustible y no puede continuar.\n");
+                                return;
+                            }
+
+                            break;
+                        }
+                        arista = arista->siguiente;
+                    }
+
+                    camino = predecesor;
                     break;
                 }
             }
@@ -188,6 +220,7 @@ void dijkstra(Galaxia* lista, char* inicio, char* destino) {
         printf("\n");
     }
 }
+
 
 %}
 
@@ -272,6 +305,6 @@ int main(int argc, char **argv) {
         yyin = archivo;
     }
     yyparse();
-    dijkstra(galaxias, "D", "E");
+    dijkstra(galaxias, "I1", "C");
     return 0;
  }

@@ -77,7 +77,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 194 "galaxia.y"
+#line 227 "galaxia.y"
 
     int numero;
     char* str;
